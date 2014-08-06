@@ -54,6 +54,7 @@
 #include <private/qv4isel_masm_p.h>
 
 #include "dataobject.h"
+
 #include "qmcloader.h"
 
 /*
@@ -76,10 +77,6 @@ int main(int argc, char ** argv)
 
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     QQmlContext *ctxt = view.rootContext();
-     ctxt->setContextProperty("myModel", QVariant::fromValue(dataList));
-
-     QElapsedTimer timer;
-     timer.start();
 //![0]
 
 #if 1
@@ -87,9 +84,7 @@ int main(int argc, char ** argv)
     QQmlEngine *engine = view.engine();
     QQmlEnginePrivate::get(engine)->v4engine()->iselFactory.reset(new QV4::JIT::ISelFactory);
     QmcLoader loader(engine);
-
     QQmlComponent *component = loader.loadComponent(":/view.qmc");
-
     if (!component) {
         qDebug() << "Could not load component";
         return -1;
@@ -103,9 +98,6 @@ int main(int argc, char ** argv)
         }
         return -1;
     }
-
-    qDebug() << "Loading qmc takes " << timer.nsecsElapsed() << " nano seconds";
-
     QObject *rootObject = component->create();
     if (!rootObject) {
         qDebug() << "Could not create root object";
@@ -114,9 +106,7 @@ int main(int argc, char ** argv)
 #else
     QQmlEngine *engine = view.engine();
     QQmlEnginePrivate::get(engine)->v4engine()->iselFactory.reset(new QV4::JIT::ISelFactory);
-    QQmlComponent *component = new QQmlComponent(engine);
-
-    component->loadUrl(QUrl("view.qml"));
+    QQmlComponent *component = new QQmlComponent(engine, QUrl("view.qml"));
     if (!component) {
         qDebug() << "Could not load component";
         return -1;
@@ -128,17 +118,14 @@ int main(int argc, char ** argv)
         }
         return -1;
     }
-
-    qDebug() << "Loading qml takes " << timer.nsecsElapsed() << " nano seconds";
-
     QObject *rootObject = component->create();
     if (!rootObject) {
         qDebug() << "Could not create root object";
         return -1;
     }
 #endif
-
- //   view.setSource(QUrl("qrc:view.qml"));
+    ctxt->setContextProperty("myModel", QVariant::fromValue(dataList));
+    //view.setSource(QUrl("qrc:view.qml"));
     view.setContent(component->url(), component, rootObject);
 
     view.show();

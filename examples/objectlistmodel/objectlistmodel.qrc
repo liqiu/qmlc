@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
         <file>view.qmc</file>
-        <file>view.qml</file>
     </qresource>
 </RCC>
